@@ -1,0 +1,209 @@
+* Which key
+#+BEGIN_SRC emacs-lisp
+  (use-package which-key
+    :ensure t
+    :init
+    (which-key-mode))
+#+END_SRC
+* Auto-Complete
+** install
+#+BEGIN_SRC emacs-lisp
+  (use-package auto-complete
+    :ensure t)
+#+END_SRC
+** start
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'after-init-hook #'global-auto-complete-mode)
+  (add-hook 'interactive-haskell-mode-hook 'ac-haskell-process-setup)
+  (add-hook 'haskell-interactive-mode-hook 'ac-haskell-process-setup)
+  (eval-after-load "auto-complete"
+    '(add-to-list 'ac-modes 'haskell-interactive-mode))
+#+END_SRC
+* Haskell Mode
+** install Haskell Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package haskell-mode
+    :ensure t)
+#+END_SRC
+** get Auto-Complete
+#+BEGIN_SRC emacs-lisp
+  (use-package ac-haskell-process
+    :ensure t)
+#+END_SRC
+** setup
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
+
+  ;; hslint on the command line only likes this indentation mode;
+  ;; alternatives commented out below.
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+  ;;(add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
+  ;;(add-hook 'haskell-mode-hook 'turn-on-haskell-simple-indent)
+
+  (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+  ;; allows C-c C-l to open a haskell REPL
+
+  ;; Ignore compiled Haskell files in filename completions
+  (add-to-list 'completion-ignored-extensions ".hi")
+
+#+END_SRC
+* Terminal
+** ansi-term
+#+BEGIN_SRC emacs-lisp
+  (defvar my-term-shell "/bin/bash")
+  (defadvice ansi-term (before force-bash)
+    (interactive (list my-term-shell)))
+   (ad-activate 'ansi-term)
+#+END_SRC
+
+** prompt
+#+BEGIN_SRC emacs-lisp
+  (defalias 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+* Org Mode
+** Bullets
+#+BEGIN_SRC emacs-lisp
+  (use-package org-bullets
+    :ensure t
+    :config
+    (add-hook 'org-mode-hook (lambda () (org-bullets-mode))))
+#+END_SRC
+** emojis :eggplant::droplet::droplet::droplet: :
+#+BEGIN_SRC emacs-lisp
+  (use-package ac-emoji
+    :ensure t
+    :config
+    (add-hook 'org-mode-hook 'ac-emoji-setup))
+  (use-package emojify
+    :ensure t
+    :config
+    (add-hook 'after-init-hook #'global-emojify-mode))
+#+END_SRC
+** etc
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+  (global-set-key "\C-cl" 'org-store-link)
+  (global-set-key "\C-ca" 'org-agenda)
+#+END_SRC
+* QoL changes
+** no splash screen
+#+BEGIN_SRC emacs-lisp
+  (setq inhibit-startup-screen t)
+#+END_SRC
+** line numbers
+#+BEGIN_SRC emacs-lisp
+  (global-display-line-numbers-mode 1)
+#+END_SRC
+** disable menu bars
+#+BEGIN_SRC emacs-lisp
+  (menu-bar-mode 0)
+  (tool-bar-mode 0)
+  (scroll-bar-mode 0)
+#+END_SRC
+** visual line mode
+#+BEGIN_SRC emacs-lisp
+  (global-visual-line-mode t)
+#+END_SRC
+* IDO/smex
+** enable IDO
+#+BEGIN_SRC emacs-lisp
+  (setq ido-enable-flex-matching nil)
+  (setq ido-create-new-buffer 'always)
+  (setq ido-everywhere t)
+  (ido-mode 1)
+#+END_SRC
+** IDO vertical
+#+BEGIN_SRC emacs-lisp
+  (use-package ido-vertical-mode
+    :ensure t
+    :init
+    (ido-vertical-mode 1))
+  (setq ido-vertical-define-keys 'C-n-and-C-p-only)
+#+END_SRC
+** smex
+#+BEGIN_SRC emacs-lisp
+  (use-package smex
+    :ensure t
+    :init (smex-initialize)
+    :bind
+    ("M-x" . smex))
+#+END_SRC
+* Buffers
+** ibuffer
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
+#+END_SRC
+** set expert mode
+#+BEGIN_SRC emacs-lisp
+  (setq ibuffer-expert t)
+#+END_SRC
+* htmlize
+#+BEGIN_SRC emacs-lisp
+  (use-package htmlize
+    :ensure t)
+#+END_SRC
+* avy
+#+BEGIN_SRC emacs-lisp
+  (use-package avy
+    :ensure t
+    :bind
+    ("M-s" . avy-goto-char))
+#+END_SRC
+* config edit/reload
+** edit
+#+BEGIN_SRC emacs-lisp
+  (defun config-visit ()
+    (interactive)
+    (find-file "~/.emacs.d/config.org"))
+  (global-set-key (kbd "C-c e") 'config-visit)
+#+END_SRC
+** reload
+#+BEGIN_SRC emacs-lisp
+  (defun config-reload ()
+    (interactive)
+    (org-babel-load-file (expand-file-name "~/.emacs.d/config.org")))
+  (global-set-key (kbd "C-c r") `config-reload)
+#+END_SRC
+* rainbow
+#+BEGIN_SRC emacs-lisp
+  (use-package rainbow-mode
+    :ensure t
+    :init (rainbow-mode 1))
+#+END_SRC
+
+* prettify
+** enable prettify
+#+BEGIN_SRC emacs-lisp
+  (global-prettify-symbols-mode 1)
+#+END_SRC
+** replacements function
+#+BEGIN_SRC emacs-lisp
+  (defun p-hooker ()
+    (mapc (lambda (pair) (push pair prettify-symbols-alist))
+	  '(;; add new shit here
+	    ("<=" .     #x2264)
+	    (">=" .     #x2265)
+	    ("lambda" . #x03BB)
+            ("/=" .     #x2260)
+            ("!=" .     #x2260))))
+#+END_SRC
+** hook list
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'haskell-mode-hook 'p-hooker)
+  (add-hook 'emacs-lisp-mode-hook 'p-hooker)
+  (add-hook 'org-mode-hook 'p-hooker)
+  (add-hook 'python-mode-hook 'p-hooker)
+#+END_SRC
+  
+* evil mode
+** enable on startup
+#+BEGIN_SRC emacs-lisp
+  (evil-mode 1)
+#+END_SRC
+
+* pdf-tools
+#+BEGIN_SRC emacs-lisp
+  (use-package pdf-tools
+    :ensure t
+    :init (pdf-tools-install))
+#+END_SRC
